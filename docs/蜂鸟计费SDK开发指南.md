@@ -25,11 +25,15 @@ appKey|是|蜂鸟计费平台分配给游戏应用的接入秘钥，不能对外
 **CreateOrder接口**
 CreateOrder（）：SDK订购接口
 
-FNPay.CreateOrder（sum,alias,FNlistener）
+FNPay.CreateOrder（context,appid,appKey,sum,subject,body,alias,listener）
     
 参数|必须|说明
 ---|-------|----  
+appId|是|蜂鸟计费平台分配给游戏应用的应用标识
+appKey|是|蜂鸟计费平台分配给游戏应用的接入秘钥，不能对外公开  
 sum |是|交易金额，分为单位，最大到千元，即长度为6位(1-100000分)
+subject|是|商品标题
+body|是|商品详情
 alias|是|开发者自定义串 ,可以是渠道标识，长度不能超过为100个字符(只能是字符或数字)
 FNlistener|是|回调接口,通过此接口通知开发者支付状态
 
@@ -37,7 +41,7 @@ FNlistener|是|回调接口,通过此接口通知开发者支付状态
 FNPayListener（returnCode, returnObject）：SDK订购结果监听器，开发者可以通过该接口监听业务操作的状态：
 returnCode: 
 // 计费成功: 0;
-// 计费失败: 1;
+// 计费失败: 10001|正在处理订单;10002|SDK未初始化;10003|请检查网络状态;
 
 
 ###2.导入蜂鸟计费SDK到开发工程
@@ -82,20 +86,21 @@ returnCode:
         android:targetSdkVersion="17" />
 
 
-		<service
+	<service
             android:name="mm.purchasesdk.iapservice.PurchaseService"
             android:exported="true" >
 
             <!-- android:process="mm.iapServices" > -->
             <intent-filter android:priority="312" >
                 <action android:name="com.aspire.purchaseservice.BIND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter android:priority="312" >
-                <action android:name="com.fn.paysdk.purchaseservice.BIND" />
+                <action android:name="你的包名.purchaseservice.BIND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
             <intent-filter android:priority="312" >
                 <action android:name="android.intent.action.MAIN" />
 
@@ -108,9 +113,9 @@ returnCode:
         <activity
             android:name="mm.purchasesdk.iapservice.BillingLayoutActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:theme="@android:style/Theme.Translucent">
+            android:theme="@android:style/Theme.Translucent" >
             <intent-filter android:priority="312" >
-                <action android:name="com.fn.paysdk.com.mmiap.activity" />
+                <action android:name="你的包名.com.mmiap.activity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -123,14 +128,16 @@ returnCode:
             android:process="safiap.framework" >
             <intent-filter android:priority="632" >
 
-            <!-- ID for services declared in AIDL -->
-        		<action android:name="safiap.framework.sdk.ISAFFramework" />
+                <!-- ID for services declared in AIDL -->
+                <action android:name="safiap.framework.sdk.ISAFFramework" />
             </intent-filter>
             <intent-filter android:priority="632" >
+
                 <!-- ID for services declared in AIDL -->
                 <action android:name="safiap.framework.ACTION_START_DOWNLOAD" />
-        	</intent-filter>
-        	<intent-filter android:priority="632" >
+            </intent-filter>
+            <intent-filter android:priority="632" >
+
                 <!-- ID for services declared in AIDL -->
                 <action android:name="safiap.framework.ACTION_CHECK_UPDATE" />
             </intent-filter>
@@ -147,12 +154,13 @@ returnCode:
                 <action android:name="safiap.framework.ACTION_SET_TIMER" />
             </intent-filter>
         </receiver>
+
         <activity
-            android:name="safiap.framework.ui.UpdateHintActivity" 
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true"
+            android:name="safiap.framework.ui.UpdateHintActivity"
             android:configChanges="orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
             <intent-filter>
                 <action android:name="safiap.framework.ACTION_TO_INSTALL" />
             </intent-filter>
@@ -166,8 +174,22 @@ returnCode:
                 <action android:name="safiap.framework.ACTION_NETWORK_ERROR_FRAMEWORK" />
             </intent-filter>
         </activity>
-        <service android:name="safiap.framework.logreport.monitor.handler.LogreportHandler" android:process=":remote"/>
-       	<!-- android:process="safiap.framework.safframeworkmanager" end -->
+
+        <service
+            android:name="safiap.framework.logreport.monitor.handler.LogreportHandler"
+            android:process=":remote" />
+        <!-- android:process="safiap.framework.safframeworkmanager" end -->
+
+
+        <!-- alipay sdk begin -->
+        <activity
+            android:name="com.alipay.sdk.app.H5PayActivity"
+            android:configChanges="orientation|keyboardHidden|navigation"
+            android:exported="false"
+            android:screenOrientation="behind"
+            android:windowSoftInputMode="adjustResize|stateHidden" >
+        </activity>
+        <!-- alipay sdk end -->
 	</application>
     </manifest>
 
